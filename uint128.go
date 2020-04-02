@@ -1,4 +1,4 @@
-package uint128 // import "lukechampine.com/uint128"
+package uint128
 
 import (
 	"encoding/binary"
