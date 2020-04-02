@@ -158,8 +158,8 @@ func TestString(t *testing.T) {
 		}
 	}
 	// Test 0 string
-	if Zero.String() != "0" {
-		t.Fatalf(`Zero.String() should be "0", got %q`, Zero.String())
+	if (Uint128{}).String() != "0" {
+		t.Fatalf(`Uint128{}.String() should be "0", got %q`, Uint128{}.String())
 	}
 	// Test Max string
 	if Max.String() != "340282366920938463463374607431768211455" {

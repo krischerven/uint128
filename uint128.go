@@ -7,9 +7,6 @@ import (
 	"math/bits"
 )
 
-// Zero is a zero-valued uint128.
-var Zero Uint128
-
 // Max is the largest possible uint128 value.
 var Max = New(math.MaxUint64, math.MaxUint64)
 
@@ -20,7 +17,7 @@ type Uint128 struct {
 
 // IsZero returns true if u == 0.
 func (u Uint128) IsZero() bool {
-	return u == Zero
+	return u == Uint128{}
 }
 
 // Equals returns true if u == v.
