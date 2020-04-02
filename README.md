@@ -1,5 +1,7 @@
-uint128 (maintained fork of lukechampine/uint128)
+uint128
 -------
+
+This is a maintained fork of lukechampine/uint128.
 
 [![GoDoc](https://godoc.org/github.com/lukechampine/uint128?status.svg)](https://godoc.org/github.com/lukechampine/uint128)
 [![Go Report Card](http://goreportcard.com/badge/github.com/lukechampine/uint128)](https://goreportcard.com/report/github.com/lukechampine/uint128)
