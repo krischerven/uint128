@@ -2,13 +2,16 @@ package uint128
 
 import (
 	"encoding/binary"
+	"math"
 	"math/big"
 	"math/bits"
-	"strconv"
 )
 
 // Zero is a zero-valued uint128.
 var Zero Uint128
+
+// Max is the largest possible uint128 value.
+var Max = New(math.MaxUint64, math.MaxUint64)
 
 // A Uint128 is an unsigned 128-bit number.
 type Uint128 struct {
@@ -33,8 +36,12 @@ func (u Uint128) Equals64(v uint64) bool {
 	return u.lo == v && u.hi == 0
 }
 
-// Cmp compares two Uint128 values. The return value follows the convention of
-// math/big.
+// Cmp compares u and v and returns:
+//
+//   -1 if u <  v
+//    0 if u == v
+//   +1 if u >  v
+//
 func (u Uint128) Cmp(v Uint128) int {
 	if u == v {
 		return 0
@@ -45,14 +52,19 @@ func (u Uint128) Cmp(v Uint128) int {
 	}
 }
 
-// Cmp64 compares u to v. The return value follows the convention of math/big.
+// Cmp64 compares u and v and returns:
+//
+//   -1 if u <  v
+//    0 if u == v
+//   +1 if u >  v
+//
 func (u Uint128) Cmp64(v uint64) int {
-	if u.hi > 0 || u.lo > v {
-		return 1
-	} else if u.lo == v {
+	if u.hi == 0 && u.lo == v {
 		return 0
-	} else {
+	} else if u.hi == 0 && u.lo < v {
 		return -1
+	} else {
+		return 1
 	}
 }
 
@@ -174,8 +186,8 @@ func (u Uint128) QuoRem64(v uint64) (q Uint128, r uint64) {
 	if u.hi < v {
 		q.lo, r = bits.Div64(u.hi, u.lo, v)
 	} else {
-		q.lo, r = bits.Div64(u.hi%v, u.lo, v)
-		q.hi = u.hi / v
+		q.hi, r = bits.Div64(0, u.hi, v)
+		q.lo, r = bits.Div64(r, u.lo, v)
 	}
 	return
 }
@@ -206,24 +218,22 @@ func (u Uint128) Rsh(n uint) (s Uint128) {
 
 // String returns the base-10 representation of u as a string.
 func (u Uint128) String() string {
-	buf := make([]byte, 40) // log10(2^128) < 40
-	for i := range buf {
-		buf[i] = '0'
+	if u.IsZero() {
+		return "0"
 	}
-	base := uint64(1e19)        // largest power of 10 that fits in a uint64
-	wbuf := make([]byte, 0, 20) // temporary buffer for individual "words"
-	var i int
-	for u.Cmp64(base) >= 0 {
-		q, r := u.QuoRem64(base)
-		w := strconv.AppendUint(wbuf, r, 10)
-		copy(buf[40-(i+len(w)):], w)
-		i += 19
+	buf := []byte("0000000000000000000000000000000000000000") // log10(2^128) < 40
+	for i := len(buf); ; i -= 19 {
+		q, r := u.QuoRem64(1e19) // largest power of 10 that fits in a uint64
+		var n int
+		for ; r != 0; r /= 10 {
+			n++
+			buf[i-n] += byte(r % 10)
+		}
+		if q.IsZero() {
+			return string(buf[i-n:])
+		}
 		u = q
 	}
-	w := strconv.AppendUint(wbuf, u.lo, 10)
-	i += len(w)
-	copy(buf[40-i:], w)
-	return string(buf[40-i:])
 }
 
 // PutBytes stores u in b in little-endian order. It panics if len(b) < 16.
