@@ -1,10 +1,10 @@
 package uint128
 
 import (
+	"encoding/binary"
 	"math"
 	"math/big"
 	"math/bits"
-	"encoding/binary"
 )
 
 // Max is the largest possible uint128 value.
